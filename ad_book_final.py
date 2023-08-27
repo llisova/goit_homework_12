@@ -116,7 +116,7 @@ class AddressBook(UserDict):
             if value.lower() in str(record).lower(): 
                 result.append(str(record))
             
-        return f"contact was find {result}" if result != [] else f"contact {value} was not found"
+        return result if result != [] else None
             
             
 
