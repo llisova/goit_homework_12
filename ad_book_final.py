@@ -1,6 +1,7 @@
 from collections import UserDict
 from datetime import date
 import pickle
+import os.path
 
 class Field:
     def __init__(self, value: str) -> None:
@@ -98,6 +99,7 @@ class Record:
         return (birthday - current_date).days
             
     def __str__(self):
+       
         return f"{self.name.value} {[ph.value for ph in self.phones]} {self.birthday.value}"
 
 class AddressBook(UserDict):
@@ -107,15 +109,16 @@ class AddressBook(UserDict):
         self.data[record.name.value] = record
 
     
-    def find_record(self, value: str) -> Record:
+    def find_record(self, value: str) -> list[Record]:
         result = []
-        for name, record in self.data.items():
-            if name.startswith(value.lower()): # зробити не чутливим до регістру
-                result.append(record)
-            else:
-                return f"contact with {value} was not find"
+        for record in self.data.values():
 
-        return f"contact was find {result}"
+            if value.lower() in str(record).lower(): 
+                result.append(str(record))
+            
+        return f"contact was find {result}" if result != [] else f"contact {value} was not found"
+            
+            
 
     def iterator(self, n) -> list[dict]:
         contact_list = [] # список записів контактів
@@ -164,6 +167,13 @@ class AddressBook(UserDict):
 
 
 if __name__ == "__main__":
+    file_name = 'data.bin'
+    if os.path.exists(file_name):  # якщо є збережена книга контактів, то читаємо її
+        with open(file_name, "rb") as fh:
+            ab = pickle.load(fh)
+    else:
+        ab = AddressBook()
+    
     name = Name('Bill')
     phone = Phone('12345671258')
     birthday = Birthday("1994-02-26")
@@ -194,12 +204,13 @@ if __name__ == "__main__":
     # print(rec.days_to_birthday())
     # print(ab.find_record("Bob"))
     
-    file_name = 'data.bin'
-
-    with open(file_name, "wb") as fh:
+    print(ab.find_record("Tom"))
+    print(ab.find_record("1234"))
+    with open(file_name, "wb") as fh:  # в кінці роботи скрипта - збергаємл
         pickle.dump(ab, fh)
 
+    
+    
 
-    with open(file_name, "rb") as fh:
-        unpacked = pickle.load(fh)
-        
+    
+    
