@@ -1,6 +1,6 @@
 from collections import UserDict
 from datetime import date
-import json
+import pickle
 
 class Field:
     def __init__(self, value: str) -> None:
@@ -106,22 +106,14 @@ class AddressBook(UserDict):
     def add_record(self, record: Record) -> None:
         self.data[record.name.value] = record
 
-    def dump(self):
-        with open(self.file, "w") as f:
-            json.dump(self.records, f)
-
-    def load(self):
-        if not self.file.exists():
-            return
-        with open(self.file, "r") as f:
-            self.records = json.load(f)
-
     
     def find_record(self, value: str) -> Record:
         result = []
-        for name, records in self.data.items():
-            if name.startswith(value):
-                result.append(records)
+        for name, record in self.data.items():
+            if name.startswith(value.lower()): # зробити не чутливим до регістру
+                result.append(record)
+            else:
+                return f"contact with {value} was not find"
 
         return f"contact was find {result}"
 
@@ -200,5 +192,14 @@ if __name__ == "__main__":
     ab.add_record(rec4)
     # ab.iterator(n=1)
     # print(rec.days_to_birthday())
-    ab.find_record("Bo")
+    # print(ab.find_record("Bob"))
     
+    file_name = 'data.bin'
+
+    with open(file_name, "wb") as fh:
+        pickle.dump(ab, fh)
+
+
+    with open(file_name, "rb") as fh:
+        unpacked = pickle.load(fh)
+        
